@@ -16,7 +16,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'RepoViz - GitHub Repository Visualizer',
   description: 'Visualize GitHub repositories instantly. Understand structure, debug faster, and explore codebases visually.',
-  generator: 'v0.app',
+  
   icons: {
     icon: [
       {
