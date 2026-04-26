@@ -1,0 +1,56 @@
+# Netlify configuration for RepoViz
+# Deploy your Next.js app to Netlify
+
+[build]
+  # Command to build your app
+  command = "npm run build"
+  
+  # Directory to deploy (Next.js builds to .next)
+  publish = ".next"
+  
+  # Functions directory (for serverless functions)
+  functions = "netlify/functions"
+
+[dev]
+  # Local development command
+  command = "npm run dev"
+  port = 3000
+
+# Redirect all requests to _next/static with cache headers
+[[redirects]]
+  from = "/_next/static/*"
+  to = "/_next/static/:splat"
+  status = 200
+  cache_control = "public, max-age=31536000, immutable"
+
+# Redirect all other requests to Next.js
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Cache headers for static assets
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/github-icon.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Environment variables (set these in Netlify UI)
+# NEXT_PUBLIC_GEMINI_API_KEY - Your Gemini API key
+# GITHUB_TOKEN - Your GitHub personal access token
+# NEXT_PUBLIC_APP_URL - Your Netlify app URL
