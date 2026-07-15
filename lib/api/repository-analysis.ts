@@ -47,6 +47,60 @@ export interface AnalysisInsight {
   description: string;
 }
 
+let gitHubAuthDisabled = false;
+
+function getGitHubHeaders(accept: string, includeAuth = true): HeadersInit {
+  const headers: HeadersInit = {
+    Accept: accept,
+    "User-Agent": "RepoViz",
+  };
+
+  const token = process.env.GITHUB_TOKEN?.trim();
+  if (includeAuth && token && !gitHubAuthDisabled) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+async function fetchGitHub(url: string, accept: string): Promise<Response> {
+  const response = await fetch(url, {
+    headers: getGitHubHeaders(accept),
+  });
+
+  if (response.status !== 401 || !process.env.GITHUB_TOKEN?.trim() || gitHubAuthDisabled) {
+    return response;
+  }
+
+  console.warn("GitHub token was rejected; retrying request without authentication");
+  gitHubAuthDisabled = true;
+
+  return fetch(url, {
+    headers: getGitHubHeaders(accept, false),
+  });
+}
+
+function getGitHubErrorMessage(errorText: string): string {
+  try {
+    const data = JSON.parse(errorText);
+    return typeof data.message === "string" ? data.message : errorText;
+  } catch {
+    return errorText;
+  }
+}
+
+function isFatalGitHubFetchError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  return (
+    error.message.startsWith("GitHub API rate limit exceeded") ||
+    error.message.startsWith("GitHub credentials were rejected") ||
+    error.message.startsWith("GitHub API request failed for root")
+  );
+}
+
 /**
  * Get available Gemini model for generateContent
  */
@@ -139,12 +193,7 @@ export async function fetchRepositoryData(
     // First, try to get repo info to verify it exists
     let repoInfo: any = {};
     try {
-      const repoResponse = await fetch(baseUrl, {
-        headers: {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "RepoViz",
-        },
-      });
+      const repoResponse = await fetchGitHub(baseUrl, "application/vnd.github.v3+json");
 
       if (repoResponse.ok) {
         repoInfo = await repoResponse.json();
@@ -182,20 +231,11 @@ export async function fetchRepositoryData(
       console.log(`Fetching [Depth ${depth}]: ${url}`);
 
       try {
-        const headers: HeadersInit = {
-          Accept: "application/vnd.github.v3+json",
-          "User-Agent": "RepoViz",
-        };
-
-        // Add GitHub token if available for higher rate limits
-        if (process.env.GITHUB_TOKEN) {
-          headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
-        }
-
-        const response = await fetch(url, { headers });
+        const response = await fetchGitHub(url, "application/vnd.github.v3+json");
 
         if (!response.ok) {
           const errorText = await response.text();
+          const errorMessage = getGitHubErrorMessage(errorText);
           console.error(`Failed to fetch ${dirPath || "root"}: ${response.status}`);
           console.error(`Error details: ${errorText}`);
           
@@ -203,10 +243,24 @@ export async function fetchRepositoryData(
           if (response.status === 404) {
             return;
           }
+
+          if (response.status === 401) {
+            throw new Error(
+              `GitHub credentials were rejected while fetching ${dirPath || "root"}. Update or remove GITHUB_TOKEN.`
+            );
+          }
           
           // If it's 403 (rate limit), we need to throw
           if (response.status === 403) {
-            throw new Error(`GitHub API rate limit exceeded. Status: ${response.status}`);
+            throw new Error(
+              `GitHub API rate limit exceeded while fetching ${dirPath || "root"}. ${errorMessage}`
+            );
+          }
+
+          if (depth === 0) {
+            throw new Error(
+              `GitHub API request failed for root. Status: ${response.status}. ${errorMessage}`
+            );
           }
           
           // For other errors, warn and continue
@@ -237,17 +291,7 @@ export async function fetchRepositoryData(
           // Fetch content for all important files
           if (item.type === "file" && shouldFetchContent(item.name)) {
             try {
-              const fileHeaders: HeadersInit = {
-                Accept: "application/vnd.github.v3.raw",
-                "User-Agent": "RepoViz",
-              };
-
-              // Add GitHub token for authenticated requests
-              if (process.env.GITHUB_TOKEN) {
-                fileHeaders.Authorization = `token ${process.env.GITHUB_TOKEN}`;
-              }
-
-              const fileResponse = await fetch(item.url, { headers: fileHeaders });
+              const fileResponse = await fetchGitHub(item.url, "application/vnd.github.v3.raw");
               if (fileResponse.ok) {
                 const text = await fileResponse.text();
                 entry.content = text.substring(0, 5000); // Limit content
@@ -266,6 +310,9 @@ export async function fetchRepositoryData(
         }
       } catch (error) {
         console.error(`Error fetching ${dirPath || "root"}:`, error);
+        if (isFatalGitHubFetchError(error)) {
+          throw error;
+        }
       }
     }
 
