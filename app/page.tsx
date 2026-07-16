@@ -10,9 +10,11 @@ import { RepositoryData, AnalysisResult } from '@/lib/api/repository-analysis'
 function HomeContent() {
   const searchParams = useSearchParams()
   const analyzedQueryRepo = useRef<string | null>(null)
+  const loadedHistoryItem = useRef<string | null>(null)
   const [showResults, setShowResults] = useState(false)
   const [repoUrl, setRepoUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isCachedResult, setIsCachedResult] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [repoData, setRepoData] = useState<RepositoryData | null>(null)
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
@@ -20,6 +22,7 @@ function HomeContent() {
   const handleAnalyze = async (url: string) => {
     setRepoUrl(url)
     setIsLoading(true)
+    setIsCachedResult(false)
     setError(null)
 
     try {
@@ -45,9 +48,10 @@ function HomeContent() {
           throw new Error(errorData.error || 'Failed to analyze repository')
         }
 
-        const { repoData: data, analysisResult: analysis } = await response.json()
+        const { repoData: data, analysisResult: analysis, cached } = await response.json()
         setRepoData(data)
         setAnalysisResult(analysis)
+        setIsCachedResult(Boolean(cached))
         setShowResults(true)
       } catch (fetchError) {
         clearTimeout(timeout)
@@ -66,12 +70,49 @@ function HomeContent() {
     setShowResults(false)
     setRepoUrl('')
     setIsLoading(false)
+    setIsCachedResult(false)
     setError(null)
     setRepoData(null)
     setAnalysisResult(null)
   }
 
+  const handleLoadHistoryItem = async (historyId: string) => {
+    setIsLoading(true)
+    setIsCachedResult(false)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/history/${encodeURIComponent(historyId)}`, {
+        cache: 'no-store',
+      })
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load saved analysis')
+      }
+
+      setRepoUrl(data.repoUrl)
+      setRepoData(data.repoData)
+      setAnalysisResult(data.analysisResult)
+      setIsCachedResult(true)
+      setShowResults(true)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load saved analysis'
+      setError(errorMessage)
+      console.error('History load error:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   useEffect(() => {
+    const historyId = searchParams.get('historyId')
+    if (historyId && loadedHistoryItem.current !== historyId) {
+      loadedHistoryItem.current = historyId
+      handleLoadHistoryItem(historyId)
+      return
+    }
+
     const queryRepoUrl = searchParams.get('repoUrl')
     if (!queryRepoUrl || analyzedQueryRepo.current === queryRepoUrl) {
       return
@@ -119,6 +160,13 @@ function HomeContent() {
         </>
       ) : repoData && analysisResult ? (
         <div className="animate-in fade-in duration-300">
+          {isCachedResult && (
+            <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+              <div className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+                Loaded from your saved analysis history.
+              </div>
+            </div>
+          )}
           <ResultsSection 
             repoUrl={repoUrl} 
             repoData={repoData}
