@@ -47,7 +47,22 @@ export interface AnalysisInsight {
   description: string;
 }
 
+type GitHubTreeItem = {
+  path: string;
+  mode: string;
+  type: "blob" | "tree" | string;
+  sha: string;
+  size?: number;
+  url: string;
+};
+
+type GitHubTreeResponse = {
+  tree?: GitHubTreeItem[];
+  truncated?: boolean;
+};
+
 let gitHubAuthDisabled = false;
+let cachedGeminiModel: string | null | undefined;
 
 function getGitHubHeaders(accept: string, includeAuth = true): HeadersInit {
   const headers: HeadersInit = {
@@ -101,16 +116,63 @@ function isFatalGitHubFetchError(error: unknown): boolean {
   );
 }
 
+function getFileExtension(path: string): string | undefined {
+  const name = path.split("/").pop() || path;
+  return name.includes(".") ? name.split(".").pop() : undefined;
+}
+
+function isHighPriorityContentFile(fileName: string): boolean {
+  return [
+    "README.md",
+    "package.json",
+    "tsconfig.json",
+    "next.config.mjs",
+    "next.config.js",
+    "vite.config.ts",
+    "vite.config.js",
+    "Dockerfile",
+    "docker-compose.yml",
+  ].includes(fileName);
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+  );
+
+  return results;
+}
+
 /**
  * Get available Gemini model for generateContent
  */
 async function getAvailableModel(): Promise<string | null> {
+  if (cachedGeminiModel !== undefined) {
+    return cachedGeminiModel;
+  }
+
   try {
     console.log("Checking available Gemini models...");
     
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey) {
       console.error("No API key found");
+      cachedGeminiModel = null;
       return null;
     }
 
@@ -121,6 +183,7 @@ async function getAvailableModel(): Promise<string | null> {
 
     if (!response.ok) {
       console.error(`Failed to list models: ${response.status}`);
+      cachedGeminiModel = null;
       return null;
     }
 
@@ -142,6 +205,7 @@ async function getAvailableModel(): Promise<string | null> {
 
     if (supportedModels.length === 0) {
       console.warn("No models support generateContent");
+      cachedGeminiModel = null;
       return null;
     }
 
@@ -154,6 +218,7 @@ async function getAvailableModel(): Promise<string | null> {
         // Extract model name from full path (e.g., "models/gemini-1.5-flash" -> "gemini-1.5-flash")
         const modelName = found.name.split("/").pop() || found.name;
         console.log(`✓ Selected model: ${modelName}`);
+        cachedGeminiModel = modelName;
         return modelName;
       }
     }
@@ -162,12 +227,14 @@ async function getAvailableModel(): Promise<string | null> {
     const firstModel = supportedModels[0];
     const modelName = firstModel.name.split("/").pop() || firstModel.name;
     console.log(`✓ Using first available model: ${modelName}`);
+    cachedGeminiModel = modelName;
     return modelName;
   } catch (error) {
     console.error("Error checking models:", error);
     // Fallback to a commonly available model
     console.log("Using fallback model: gemini-1.5-flash");
-    return "gemini-1.5-flash";
+    cachedGeminiModel = "gemini-1.5-flash";
+    return cachedGeminiModel;
   }
 }
 
@@ -203,125 +270,85 @@ export async function fetchRepositoryData(
       console.warn("Could not fetch repo info, continuing with file fetch");
     }
 
-    // Fetch files recursively from all folders
-    const files: FileEntry[] = [];
-    const structure: DirectoryStructure[] = [];
-    const visitedPaths = new Set<string>();
-    let fetchCount = 0;
-    const maxFetches = 200; // Balance between coverage and speed (was 100)
-    const maxDepth = 6; // Increased to get more coverage (was 5)
+    const defaultBranch = repoInfo.default_branch || "HEAD";
+    const treeUrl = `${baseUrl}/git/trees/${encodeURIComponent(defaultBranch)}?recursive=1`;
+    console.log(`Fetching repository tree: ${treeUrl}`);
 
-    /**
-     * Recursively fetch contents from a directory
-     */
-    async function fetchDirContents(dirPath: string = "", depth: number = 0): Promise<void> {
-      if (fetchCount >= maxFetches) {
-        console.warn(`Reached max fetch limit (${maxFetches})`);
-        return;
+    const treeResponse = await fetchGitHub(treeUrl, "application/vnd.github.v3+json");
+    if (!treeResponse.ok) {
+      const errorText = await treeResponse.text();
+      const errorMessage = getGitHubErrorMessage(errorText);
+
+      if (treeResponse.status === 401) {
+        throw new Error("GitHub credentials were rejected while fetching repository tree. Update or remove GITHUB_TOKEN.");
       }
 
-      // Don't go too deep
-      if (depth > maxDepth) {
-        console.warn(`Reached max depth (${maxDepth}), stopping recursion`);
-        return;
+      if (treeResponse.status === 403) {
+        throw new Error(`GitHub API rate limit exceeded while fetching repository tree. ${errorMessage}`);
       }
 
-      fetchCount++;
-      const url = `${baseUrl}/contents${dirPath ? `/${dirPath}` : ""}`;
-      console.log(`Fetching [Depth ${depth}]: ${url}`);
-
-      try {
-        const response = await fetchGitHub(url, "application/vnd.github.v3+json");
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          const errorMessage = getGitHubErrorMessage(errorText);
-          console.error(`Failed to fetch ${dirPath || "root"}: ${response.status}`);
-          console.error(`Error details: ${errorText}`);
-          
-          // If it's a 404, the path doesn't exist - that's ok
-          if (response.status === 404) {
-            return;
-          }
-
-          if (response.status === 401) {
-            throw new Error(
-              `GitHub credentials were rejected while fetching ${dirPath || "root"}. Update or remove GITHUB_TOKEN.`
-            );
-          }
-          
-          // If it's 403 (rate limit), we need to throw
-          if (response.status === 403) {
-            throw new Error(
-              `GitHub API rate limit exceeded while fetching ${dirPath || "root"}. ${errorMessage}`
-            );
-          }
-
-          if (depth === 0) {
-            throw new Error(
-              `GitHub API request failed for root. Status: ${response.status}. ${errorMessage}`
-            );
-          }
-          
-          // For other errors, warn and continue
-          console.warn(`Continuing despite error at ${dirPath || "root"}`);
-          return;
-        }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          console.warn("Expected array response from GitHub API");
-          return;
-        }
-
-        // Process all items in this directory
-        for (const item of data) {
-          if (visitedPaths.has(item.path)) continue;
-          visitedPaths.add(item.path);
-
-          const entry: FileEntry = {
-            path: item.path,
-            name: item.name,
-            type: item.type === "dir" ? "folder" : "file",
-            size: item.size || 0,
-            extension: item.name.split(".").pop(),
-          };
-
-          // Fetch content for all important files
-          if (item.type === "file" && shouldFetchContent(item.name)) {
-            try {
-              const fileResponse = await fetchGitHub(item.url, "application/vnd.github.v3.raw");
-              if (fileResponse.ok) {
-                const text = await fileResponse.text();
-                entry.content = text.substring(0, 5000); // Limit content
-              }
-            } catch (error) {
-              console.warn(`Could not fetch content for ${item.path}`);
-            }
-          }
-
-          files.push(entry);
-
-          // If it's a directory, recursively fetch its contents
-          if (item.type === "dir" && fetchCount < maxFetches) {
-            await fetchDirContents(item.path, depth + 1);
-          }
-        }
-      } catch (error) {
-        console.error(`Error fetching ${dirPath || "root"}:`, error);
-        if (isFatalGitHubFetchError(error)) {
-          throw error;
-        }
-      }
+      throw new Error(`GitHub API request failed for repository tree. Status: ${treeResponse.status}. ${errorMessage}`);
     }
 
-    // Start recursive fetch from root
-    await fetchDirContents("", 0);
+    const treeData = (await treeResponse.json()) as GitHubTreeResponse;
+    if (!Array.isArray(treeData.tree)) {
+      throw new Error("Unexpected GitHub tree response.");
+    }
+
+    if (treeData.truncated) {
+      console.warn("GitHub tree response was truncated; analysis will use the returned subset");
+    }
+
+    const files: FileEntry[] = treeData.tree
+      .filter((item) => item.type === "blob" || item.type === "tree")
+      .map((item) => {
+        const name = item.path.split("/").pop() || item.path;
+
+        return {
+          path: item.path,
+          name,
+          type: item.type === "tree" ? "folder" : "file",
+          size: item.size || 0,
+          extension: getFileExtension(item.path),
+        };
+      });
+
+    const contentCandidates = treeData.tree
+      .filter((item) => item.type === "blob")
+      .filter((item) => shouldFetchContent(item.path.split("/").pop() || item.path))
+      .filter((item) => (item.size || 0) <= 250_000)
+      .sort((a, b) => {
+        const aName = a.path.split("/").pop() || a.path;
+        const bName = b.path.split("/").pop() || b.path;
+        const configPriority = Number(!isHighPriorityContentFile(aName)) - Number(!isHighPriorityContentFile(bName));
+        return configPriority || a.path.localeCompare(b.path);
+      })
+      .slice(0, 25);
+
+    const fileByPath = new Map(files.map((file) => [file.path, file]));
+    await mapWithConcurrency(contentCandidates, 8, async (item) => {
+      try {
+        const fileResponse = await fetchGitHub(item.url, "application/vnd.github.v3.raw");
+        if (!fileResponse.ok) {
+          console.warn(`Could not fetch content for ${item.path}: ${fileResponse.status}`);
+          return;
+        }
+
+        const text = await fileResponse.text();
+        const file = fileByPath.get(item.path);
+        if (file) {
+          file.content = text.substring(0, 5000);
+        }
+      } catch (error) {
+        console.warn(`Could not fetch content for ${item.path}`);
+      }
+    });
 
     if (files.length === 0) {
       throw new Error("No files found in repository.");
     }
+
+    const structure: DirectoryStructure[] = [];
 
     // Build directory structure
     function buildStructure(items: FileEntry[]): DirectoryStructure[] {
