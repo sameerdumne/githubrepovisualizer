@@ -53,4 +53,7 @@
 # Environment variables (set these in Netlify UI)
 # NEXT_PUBLIC_GEMINI_API_KEY - Your Gemini API key
 # GITHUB_TOKEN - Your GitHub personal access token
+# GITHUB_CLIENT_ID - GitHub OAuth App client ID
+# GITHUB_CLIENT_SECRET - GitHub OAuth App client secret
+# AUTH_SECRET - Long random string used to sign login session cookies
 # NEXT_PUBLIC_APP_URL - Your Netlify app URL
