@@ -18,6 +18,20 @@ export const GITHUB_SESSION_COOKIE = "repoviz_github_session";
 export const GITHUB_OAUTH_STATE_COOKIE = "repoviz_github_oauth_state";
 export const GITHUB_OAUTH_RETURN_COOKIE = "repoviz_github_oauth_return";
 
+export function getAppOrigin(requestOrigin: string) {
+  const configuredUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!configuredUrl) {
+    return requestOrigin;
+  }
+
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return requestOrigin;
+  }
+}
+
 function getSessionSecret() {
   const secret = process.env.AUTH_SECRET || process.env.GITHUB_CLIENT_SECRET;
 
