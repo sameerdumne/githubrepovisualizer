@@ -56,4 +56,6 @@
 # GITHUB_CLIENT_ID - GitHub OAuth App client ID
 # GITHUB_CLIENT_SECRET - GitHub OAuth App client secret
 # AUTH_SECRET - Long random string used to sign login session cookies
+# SUPABASE_URL - Your Supabase project URL
+# SUPABASE_SERVICE_ROLE_KEY - Supabase service role key for server-side history storage
 # NEXT_PUBLIC_APP_URL - Your Netlify app URL

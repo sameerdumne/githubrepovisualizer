@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { parseGitHubRepoUrl } from "@/lib/api/github-url";
 
 const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
 
@@ -244,13 +245,7 @@ async function getAvailableModel(): Promise<string | null> {
 export async function fetchRepositoryData(
   repoUrl: string
 ): Promise<RepositoryData> {
-  // Parse GitHub URL
-  const match = repoUrl.match(/github\.com\/([^/]+)\/([^/]+)/);
-  if (!match) {
-    throw new Error("Invalid GitHub URL format. Use: https://github.com/owner/repo");
-  }
-
-  const [, owner, repo] = match;
+  const { owner, repo } = parseGitHubRepoUrl(repoUrl);
 
   try {
     const baseUrl = `https://api.github.com/repos/${owner}/${repo}`;
