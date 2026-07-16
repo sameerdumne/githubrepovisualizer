@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Navbar } from '@/components/navbar'
 import { HeroSection } from '@/components/hero-section'
 import { ResultsSection } from '@/components/results-section'
 import { RepositoryData, AnalysisResult } from '@/lib/api/repository-analysis'
 
-export default function Home() {
+function HomeContent() {
+  const searchParams = useSearchParams()
+  const analyzedQueryRepo = useRef<string | null>(null)
   const [showResults, setShowResults] = useState(false)
   const [repoUrl, setRepoUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -68,6 +71,16 @@ export default function Home() {
     setAnalysisResult(null)
   }
 
+  useEffect(() => {
+    const queryRepoUrl = searchParams.get('repoUrl')
+    if (!queryRepoUrl || analyzedQueryRepo.current === queryRepoUrl) {
+      return
+    }
+
+    analyzedQueryRepo.current = queryRepoUrl
+    handleAnalyze(queryRepoUrl)
+  }, [searchParams])
+
   return (
     <main className="min-h-screen bg-background">
       <Navbar />
@@ -123,5 +136,13 @@ export default function Home() {
         </div>
       ) : null}
     </main>
+  )
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-background"><Navbar /></main>}>
+      <HomeContent />
+    </Suspense>
   )
 }
