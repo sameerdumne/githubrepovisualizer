@@ -4,6 +4,7 @@ import {
   GITHUB_OAUTH_RETURN_COOKIE,
   GITHUB_OAUTH_STATE_COOKIE,
   GITHUB_SESSION_COOKIE,
+  getAppOrigin,
   getSessionCookieOptions,
   type GitHubSessionUser,
 } from "@/lib/auth/github-session";
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const clientSecret = process.env.GITHUB_CLIENT_SECRET;
   const requestUrl = new URL(request.url);
-  const origin = requestUrl.origin;
+  const origin = getAppOrigin(requestUrl.origin);
   const fallbackUrl = new URL("/login?error=github_config", origin);
 
   if (!clientId || !clientSecret) {

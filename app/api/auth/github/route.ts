@@ -3,17 +3,23 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   GITHUB_OAUTH_RETURN_COOKIE,
   GITHUB_OAUTH_STATE_COOKIE,
+  getAppOrigin,
   getTransientCookieOptions,
 } from "@/lib/auth/github-session";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
-  const clientId = process.env.GITHUB_CLIENT_ID;
-  if (!clientId) {
-    return NextResponse.redirect(new URL("/login?error=github_config", requestUrl.origin));
+  const origin = getAppOrigin(requestUrl.origin);
+
+  if (requestUrl.origin !== origin) {
+    return NextResponse.redirect(new URL(`${requestUrl.pathname}${requestUrl.search}`, origin));
   }
 
-  const origin = requestUrl.origin;
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  if (!clientId) {
+    return NextResponse.redirect(new URL("/login?error=github_config", origin));
+  }
+
   const requestedReturnTo = requestUrl.searchParams.get("returnTo") || "/login";
   const returnTo = requestedReturnTo.startsWith("/") && !requestedReturnTo.startsWith("//")
     ? requestedReturnTo
