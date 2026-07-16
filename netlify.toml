@@ -2,17 +2,12 @@
 # Deploy your Next.js app to Netlify
 
 [build]
-  # Command to build your app
   command = "npm run build"
-  
-  # Directory to deploy (Next.js builds to .next)
-  publish = ".next"
-  
-  # Functions directory (for serverless functions)
-  functions = "netlify/functions"
+
+[build.plugins]
+  package = "@netlify/plugin-nextjs"
 
 [dev]
-  # Local development command
   command = "npm run dev"
   port = 3000
 
@@ -22,12 +17,6 @@
   to = "/_next/static/:splat"
   status = 200
   cache_control = "public, max-age=31536000, immutable"
-
-# Redirect all other requests to Next.js
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 # Security headers
 [[headers]]
