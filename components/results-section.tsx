@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TreeView, TreeNode } from '@/components/tree-view'
+import { TreemapView } from '@/components/treemap-view'
 import { FilePreviewPanel } from '@/components/file-preview-panel'
 import { ExportPanel } from '@/components/export-panel'
 import { DependencyGraph } from '@/components/dependency-graph'
 import { RepositoryData, AnalysisResult, buildTreeStructure } from '@/lib/api/repository-analysis'
-import { AlertCircle, CheckCircle2, AlertTriangle, Info, GitBranch } from 'lucide-react'
+import { AlertCircle, CheckCircle2, AlertTriangle, Info, GitBranch, LayoutGrid, List } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface ResultsSectionProps {
   repoUrl: string
@@ -20,6 +22,7 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [activeTab, setActiveTab] = useState('dependencies')
+  const [structureView, setStructureView] = useState<'tree' | 'treemap'>('tree')
 
   const treeStructure = buildTreeStructure(repoData.files)
   
@@ -60,15 +63,55 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
 
       {/* Tree View and Preview Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
-        {/* Left Panel - Directory Tree */}
+        {/* Left Panel - Directory Tree / Treemap */}
         <div className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden flex flex-col max-h-[600px]">
-          <div className="sticky top-0 bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-4 z-10">
-            <h3 className="text-sm font-semibold text-foreground">📁 Repository Structure</h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders
-            </p>
+          <div className="sticky top-0 bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3 z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Repository Structure</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders
+                </p>
+              </div>
+              <div className="flex items-center bg-background rounded-md border border-border p-0.5">
+                <button
+                  onClick={() => setStructureView('tree')}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+                    structureView === 'tree'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <List className="h-3.5 w-3.5" />
+                  Tree
+                </button>
+                <button
+                  onClick={() => setStructureView('treemap')}
+                  className={cn(
+                    'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+                    structureView === 'treemap'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                  Treemap
+                </button>
+              </div>
+            </div>
           </div>
-          <TreeView nodes={treeStructure} onSelect={handleSelectFile} />
+          {structureView === 'tree' ? (
+            <TreeView nodes={treeStructure} onSelect={handleSelectFile} />
+          ) : (
+            <TreemapView
+              files={repoData.files}
+              onSelectFile={(path) => {
+                setSelectedFile(path)
+                setShowPreview(true)
+              }}
+            />
+          )}
         </div>
 
         {/* Right Panel - File Preview */}

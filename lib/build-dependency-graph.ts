@@ -26,7 +26,7 @@ export interface DependencyGraphData {
   edges: GraphEdge[]
 }
 
-const EXTENSION_COLORS: Record<string, string> = {
+export const EXTENSION_COLORS: Record<string, string> = {
   tsx: '#a78bfa',
   ts: '#60a5fa',
   jsx: '#c084fc',
@@ -45,7 +45,7 @@ const EXTENSION_COLORS: Record<string, string> = {
   java: '#f87171',
 }
 
-function getFileColor(path: string): string {
+export function getFileColor(path: string): string {
   const ext = path.split('.').pop()?.toLowerCase() || ''
   return EXTENSION_COLORS[ext] || '#94a3b8'
 }
