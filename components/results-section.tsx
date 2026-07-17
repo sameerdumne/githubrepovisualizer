@@ -54,6 +54,37 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
     }
   }
 
+  const StructureToggle = () => (
+    <div className="flex items-center bg-background rounded-md border border-border p-0.5">
+      <button
+        onClick={() => setStructureView('tree')}
+        className={cn(
+          'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+          structureView === 'tree'
+            ? 'bg-muted text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+        )}
+      >
+        <List className="h-3.5 w-3.5" />
+        Tree
+      </button>
+      <button
+        onClick={() => setStructureView('treemap')}
+        className={cn(
+          'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+          structureView === 'treemap'
+            ? 'bg-muted text-foreground'
+            : 'text-muted-foreground hover:text-foreground'
+        )}
+      >
+        <LayoutGrid className="h-3.5 w-3.5" />
+        Treemap
+      </button>
+    </div>
+  )
+
+  const currentView = structureView
+
   return (
     <div className="mx-auto max-w-full px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
@@ -62,67 +93,59 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
       </div>
 
       {/* Tree View and Preview Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
-        {/* Left Panel - Directory Tree / Treemap */}
-        <div className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden flex flex-col max-h-[600px]">
-          <div className="sticky top-0 bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3 z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Repository Structure</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders
-                </p>
-              </div>
-              <div className="flex items-center bg-background rounded-md border border-border p-0.5">
-                <button
-                  onClick={() => setStructureView('tree')}
-                  className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
-                    structureView === 'tree'
-                      ? 'bg-muted text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <List className="h-3.5 w-3.5" />
-                  Tree
-                </button>
-                <button
-                  onClick={() => setStructureView('treemap')}
-                  className={cn(
-                    'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
-                    structureView === 'treemap'
-                      ? 'bg-muted text-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                  Treemap
-                </button>
+      {currentView === 'tree' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
+          {/* Left Panel - Directory Tree */}
+          <div className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden flex flex-col max-h-[600px]">
+            <div className="sticky top-0 bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">Repository Structure</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders
+                  </p>
+                </div>
+                <StructureToggle />
               </div>
             </div>
-          </div>
-          {structureView === 'tree' ? (
             <TreeView nodes={treeStructure} onSelect={handleSelectFile} />
-          ) : (
-            <TreemapView
-              files={repoData.files}
-              onSelectFile={(path) => {
-                setSelectedFile(path)
-                setShowPreview(true)
-              }}
+          </div>
+
+          {/* Right Panel - File Preview */}
+          {showPreview && selectedFile && (
+            <FilePreviewPanel
+              selectedFile={selectedFile}
+              content={currentContent}
+              onClose={() => setShowPreview(false)}
             />
           )}
         </div>
-
-        {/* Right Panel - File Preview */}
-        {showPreview && selectedFile && (
-          <FilePreviewPanel
-            selectedFile={selectedFile}
-            content={currentContent}
-            onClose={() => setShowPreview(false)}
-          />
-        )}
-      </div>
+      ) : (
+        <div className="mb-6">
+          <div className="bg-card rounded-lg border border-border overflow-hidden">
+            <div className="bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">Repository Treemap</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders • {(repoData.stats.totalSize / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+                <StructureToggle />
+              </div>
+            </div>
+            <div className="h-[600px]">
+              <TreemapView
+                files={repoData.files}
+                onSelectFile={(path) => {
+                  setSelectedFile(path)
+                  setShowPreview(true)
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Statistics and Analysis */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
