@@ -5,8 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TreeView, TreeNode } from '@/components/tree-view'
 import { FilePreviewPanel } from '@/components/file-preview-panel'
 import { ExportPanel } from '@/components/export-panel'
+import { DependencyGraph } from '@/components/dependency-graph'
 import { RepositoryData, AnalysisResult, buildTreeStructure } from '@/lib/api/repository-analysis'
-import { AlertCircle, CheckCircle2, AlertTriangle, Info } from 'lucide-react'
+import { AlertCircle, CheckCircle2, AlertTriangle, Info, GitBranch } from 'lucide-react'
 
 interface ResultsSectionProps {
   repoUrl: string
@@ -18,7 +19,7 @@ interface ResultsSectionProps {
 export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSectionProps) {
   const [selectedFile, setSelectedFile] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('dependencies')
 
   const treeStructure = buildTreeStructure(repoData.files)
   
@@ -84,6 +85,10 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
       <div className="bg-card rounded-lg border border-border overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
           <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0 h-auto gap-0 justify-start">
+            <TabsTrigger value="dependencies" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <GitBranch className="h-4 w-4 mr-2" />
+              Dependencies
+            </TabsTrigger>
             <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
               📊 Overview
             </TabsTrigger>
@@ -97,6 +102,10 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
               📥 Export
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dependencies" className="flex-1 m-0 overflow-hidden">
+            <DependencyGraph repoData={repoData} />
+          </TabsContent>
 
           <TabsContent value="overview" className="flex-1 p-6 m-0 overflow-auto">
             <div className="space-y-6">
