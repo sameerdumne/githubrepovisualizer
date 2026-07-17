@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { ChevronRight, Folder, FileText, Code2, Settings2, FileCode } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -38,10 +38,38 @@ function getFileIcon(fileName: string) {
 }
 
 export function TreeView({ nodes, onSelect }: TreeViewProps) {
+  const [openPaths, setOpenPaths] = useState<Set<string>>(() => {
+    const initial = new Set<string>()
+    for (const node of nodes) {
+      initial.add(node.name)
+    }
+    return initial
+  })
+
+  const togglePath = useCallback((path: string) => {
+    setOpenPaths(prev => {
+      const next = new Set(prev)
+      if (next.has(path)) {
+        next.delete(path)
+      } else {
+        next.add(path)
+      }
+      return next
+    })
+  }, [])
+
   return (
     <div className="h-full overflow-auto">
       {nodes.map((node) => (
-        <TreeNodeComponent key={node.name} node={node} level={0} onSelect={onSelect} path={node.name} />
+        <TreeNodeComponent
+          key={node.name}
+          node={node}
+          level={0}
+          onSelect={onSelect}
+          path={node.name}
+          openPaths={openPaths}
+          togglePath={togglePath}
+        />
       ))}
     </div>
   )
@@ -52,12 +80,21 @@ interface TreeNodeComponentProps {
   level: number
   onSelect?: (node: TreeNode, path: string) => void
   path: string
+  openPaths: Set<string>
+  togglePath: (path: string) => void
 }
 
-function TreeNodeComponent({ node, level, onSelect, path }: TreeNodeComponentProps) {
-  const [isOpen, setIsOpen] = useState(level === 0)
+function TreeNodeComponent({ node, level, onSelect, path, openPaths, togglePath }: TreeNodeComponentProps) {
   const hasChildren = node.type === 'folder' && node.children && node.children.length > 0
   const isFile = node.type === 'file'
+  const isOpen = openPaths.has(path)
+
+  const handleClick = () => {
+    if (hasChildren) {
+      togglePath(path)
+    }
+    onSelect?.(node, path)
+  }
 
   return (
     <div>
@@ -68,15 +105,11 @@ function TreeNodeComponent({ node, level, onSelect, path }: TreeNodeComponentPro
           node.selected && 'bg-accent text-accent-foreground font-semibold'
         )}
         style={{ paddingLeft: `${12 + level * 16}px` }}
-        onClick={() => {
-          if (hasChildren) setIsOpen(!isOpen)
-          onSelect?.(node, path)
-        }}
+        onClick={handleClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            if (hasChildren) setIsOpen(!isOpen)
-            onSelect?.(node, path)
+            handleClick()
           }
         }}
         role="button"
@@ -107,6 +140,8 @@ function TreeNodeComponent({ node, level, onSelect, path }: TreeNodeComponentPro
               level={level + 1}
               onSelect={onSelect}
               path={`${path}/${child.name}`}
+              openPaths={openPaths}
+              togglePath={togglePath}
             />
           ))}
         </div>
