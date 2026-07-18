@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RepoViz | Minimalist Repository Analytics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/geist@1.3.0/dist/fonts/geist.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+            font-family: 'Geist', sans-serif;
+            overflow-x: hidden;
+        }
+        .monolith-grid {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, #171717 1px, transparent 1px),
+                              linear-gradient(to bottom, #171717 1px, transparent 1px);
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+        }
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#ffffff",
+                        "surface": "#0a0a0a",
+                        "surface-container": "#141313",
+                        "outline-variant": "#262626",
+                        "on-surface": "#e5e2e1",
+                        "on-surface-variant": "#a3a3a3"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "margin-desktop": "64px",
+                        "margin-mobile": "20px",
+                        "container-max": "1440px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Geist"],
+                        "mono-sm": ["Geist"],
+                        "headline-sm": ["Geist"],
+                        "headline-md": ["Geist"],
+                        "display-lg": ["Geist"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-surface selection:bg-primary selection:text-surface">
+<!-- Grid Overlay -->
+<div class="fixed inset-0 monolith-grid pointer-events-none opacity-50"></div>
+<div class="scanline"></div>
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full bg-surface/80 backdrop-blur-md border-b border-outline-variant z-50">
+<nav class="flex justify-between items-center h-16 px-margin-desktop w-full mx-auto max-w-container-max">
+<div class="flex items-center gap-8">
+<span class="font-headline-sm text-headline-sm font-bold text-primary">RepoViz</span>
+<div class="hidden md:flex gap-6">
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md transition-opacity duration-200 active:opacity-70" href="#">Repositories</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md transition-opacity duration-200 active:opacity-70" href="#">Activity</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md transition-opacity duration-200 active:opacity-70" href="#">Analytics</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md transition-opacity duration-200 active:opacity-70" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_circle</span>
+</div>
+</nav>
+</header>
+<main class="relative pt-32 pb-64 min-h-screen flex flex-col items-center">
+<!-- Hero Section -->
+<section class="w-full max-w-4xl px-margin-mobile md:px-0 text-center mb-24">
+<h1 class="font-display-lg text-[64px] leading-[1.1] tracking-tighter text-primary mb-8 animate-fade-in">
+                Visualize the <span class="block">Architectural Core.</span>
+</h1>
+<p class="font-body-lg text-lg text-on-surface-variant max-w-2xl mx-auto mb-12">
+                Turn complex repositories into actionable insights. Precision engineering for codebase health, contributor velocity, and structural integrity.
+            </p>
+<!-- Central URL Input -->
+<div class="relative group max-w-2xl mx-auto">
+<div class="flex flex-col md:flex-row gap-0 border border-outline-variant focus-within:border-primary transition-all duration-300">
+<div class="flex-grow flex items-center px-4 bg-surface-container/50">
+<span class="material-symbols-outlined text-on-surface-variant mr-3">link</span>
+<input class="w-full py-5 bg-transparent border-none focus:ring-0 text-primary font-mono-sm placeholder:text-neutral-600" placeholder="https://github.com/organization/repository" type="text"/>
+</div>
+<button class="bg-primary text-surface font-bold px-8 py-5 hover:bg-neutral-200 transition-colors active:scale-[0.98]">
+                        Analyze Repo
+                    </button>
+</div>
+<div class="mt-4 flex justify-center gap-4 text-[12px] font-mono-sm text-neutral-500 uppercase tracking-widest">
+<span>Public repositories</span>
+<span class="text-neutral-700">/</span>
+<span>Private access via SSH</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Feature Display -->
+<section class="w-full max-w-container-max px-margin-desktop grid grid-cols-1 md:grid-cols-12 gap-gutter mb-32">
+<div class="md:col-span-8 border border-outline-variant p-12 relative overflow-hidden group">
+<div class="relative z-10">
+<span class="font-mono-sm text-neutral-500 mb-4 block tracking-widest">01 / DISCOVERY</span>
+<h3 class="font-headline-md text-3xl text-primary mb-4">Deep Structural Mapping</h3>
+<p class="text-on-surface-variant max-w-md">Automatically generate dependency graphs and identify circular references in monolithic architectures.</p>
+</div>
+<div class="absolute right-0 bottom-0 w-1/2 h-full opacity-20 group-hover:opacity-40 transition-opacity">
+<img class="object-cover w-full h-full grayscale" data-alt="A highly technical, minimalist architectural blueprint of a software system with nodes and lines rendered in sharp white on a deep black background. The style is reminiscent of high-end industrial engineering diagrams, clean and authoritative." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABxi0VrrEBcJO6NZH_JaV36DV7nBnNEOGzjEaIEBJ8q7l_ZIDgcVVo4zTDgau1wz3J3dQ7-ydkYv9lUUWf0HVqBqykWMglrwYuNe9YlwWfovGbIeo3upqzZTuEF2mca18vKEQFCKQbyTCpBrOs0wEKvFFhvSsnwIN51Ap6-dR-F5_Qid2zxiYs7zcxWOmlNphAixmnfVDyimpwv1_LvnMUmejVkfZo7ZSo5pXxJzdznOhCf18GTlQVTILrte6ZFv1gciK5U34shb0"/>
+</div>
+</div>
+<div class="md:col-span-4 border border-outline-variant p-8 flex flex-col justify-between bg-surface-container/30">
+<span class="font-mono-sm text-neutral-500 mb-4 block tracking-widest">02 / VELOCITY</span>
+<div>
+<h3 class="font-headline-sm text-xl text-primary mb-2">Cycle Time Analysis</h3>
+<p class="text-on-surface-variant text-sm">Measure the time from first commit to production deployment with sub-minute precision.</p>
+</div>
+<div class="mt-8 border-t border-outline-variant pt-4">
+<div class="flex justify-between items-end">
+<div class="flex gap-1 h-12 items-end">
+<div class="w-2 bg-neutral-800 h-1/2"></div>
+<div class="w-2 bg-neutral-700 h-3/4"></div>
+<div class="w-2 bg-primary h-full"></div>
+<div class="w-2 bg-neutral-800 h-2/3"></div>
+</div>
+<span class="font-mono-sm text-primary">+12.4%</span>
+</div>
+</div>
+</div>
+<div class="md:col-span-4 border border-outline-variant p-8 bg-surface-container/30">
+<span class="font-mono-sm text-neutral-500 mb-4 block tracking-widest">03 / HEALTH</span>
+<h3 class="font-headline-sm text-xl text-primary mb-2">Technical Debt Ledger</h3>
+<p class="text-on-surface-variant text-sm">Automated identification of code smells and outdated dependencies across 40+ languages.</p>
+</div>
+<div class="md:col-span-8 border border-outline-variant p-8 flex items-center justify-between group cursor-crosshair">
+<div>
+<span class="font-mono-sm text-neutral-500 mb-4 block tracking-widest">04 / COLLABORATION</span>
+<h3 class="font-headline-sm text-xl text-primary mb-2">Team Impact Matrix</h3>
+<p class="text-on-surface-variant text-sm">Visualize knowledge silos and ensure continuity through intelligent contributor heatmaps.</p>
+</div>
+<div class="w-32 h-32 border border-outline-variant relative flex items-center justify-center">
+<div class="absolute w-4 h-4 bg-primary animate-pulse"></div>
+<div class="w-full h-px bg-outline-variant absolute"></div>
+<div class="h-full w-px bg-outline-variant absolute"></div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="w-full bg-primary py-24 px-margin-desktop text-center">
+<h2 class="font-display-lg text-4xl md:text-6xl text-surface font-bold tracking-tighter mb-8">
+                Ready to see your code differently?
+            </h2>
+<div class="flex flex-col md:flex-row justify-center gap-6">
+<button class="bg-surface text-primary px-12 py-4 font-bold hover:bg-neutral-900 transition-all">Get Started Free</button>
+<button class="border-2 border-surface text-surface px-12 py-4 font-bold hover:bg-surface/10 transition-all">Schedule Demo</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center py-12 px-margin-desktop w-full max-w-container-max mx-auto gap-8">
+<div class="flex flex-col items-center md:items-start gap-4">
+<span class="font-bold text-primary font-headline-sm">RepoViz</span>
+<p class="font-mono-sm text-on-surface-variant text-xs">© 2024 RepoViz Inc. Precision Engineering.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-8">
+<a class="text-on-surface-variant hover:text-primary underline transition-all font-mono-sm text-mono-sm" href="#">Documentation</a>
+<a class="text-on-surface-variant hover:text-primary underline transition-all font-mono-sm text-mono-sm" href="#">API</a>
+<a class="text-on-surface-variant hover:text-primary underline transition-all font-mono-sm text-mono-sm" href="#">Privacy</a>
+<a class="text-on-surface-variant hover:text-primary underline transition-all font-mono-sm text-mono-sm" href="#">Status</a>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-surface cursor-pointer transition-all">
+<span class="material-symbols-outlined text-sm">terminal</span>
+</div>
+<div class="w-8 h-8 border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-surface cursor-pointer transition-all">
+<span class="material-symbols-outlined text-sm">code</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for input hover focus
+        document.addEventListener('mousemove', (e) => {
+            const scanline = document.querySelector('.scanline');
+            if (scanline) {
+                // Occasional jitter effect
+                if (Math.random() > 0.99) {
+                    scanline.style.opacity = '0.4';
+                    setTimeout(() => scanline.style.opacity = '1', 50);
+                }
+            }
+        });
+
+        // Simple typing effect for placeholder
+        const input = document.querySelector('input[type="text"]');
+        const placeholders = [
+            "https://github.com/facebook/react",
+            "https://github.com/tailwindlabs/tailwindcss",
+            "https://github.com/vercel/next.js"
+        ];
+        let pIndex = 0;
+        
+        setInterval(() => {
+            pIndex = (pIndex + 1) % placeholders.length;
+            input.placeholder = placeholders[pIndex];
+        }, 4000);
+    </script>
+</body></html>
