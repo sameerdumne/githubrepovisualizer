@@ -7,6 +7,7 @@ import { DependencyGraph } from '@/components/dependency-graph'
 import { TreeView, TreeNode } from '@/components/tree-view'
 import { TreemapView } from '@/components/treemap-view'
 import { FilePreviewPanel } from '@/components/file-preview-panel'
+import { ExportPanel } from '@/components/export-panel'
 import { RepositoryData, AnalysisResult, buildTreeStructure } from '@/lib/api/repository-analysis'
 import { cn } from '@/lib/utils'
 
@@ -240,6 +241,9 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
               <TabsTrigger value="recommendations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
                 Recommendations
               </TabsTrigger>
+              <TabsTrigger value="export" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+                Export
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="dependencies" className="flex-1 m-0 overflow-hidden">
@@ -345,6 +349,10 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
                   <p className="text-sm text-muted-foreground">No recommendations at this time</p>
                 )}
               </div>
+            </TabsContent>
+
+            <TabsContent value="export" className="flex-1 p-6 m-0 overflow-auto">
+              <ExportPanel repoUrl={repoUrl} repoData={repoData} />
             </TabsContent>
           </Tabs>
         </div>
