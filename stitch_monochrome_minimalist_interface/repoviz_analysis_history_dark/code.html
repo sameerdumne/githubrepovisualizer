@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RepoViz | Analysis History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+            font-weight: 400;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+            font-weight: 500;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+            font-weight: 600;
+        }
+        @font-face {
+            font-family: 'Geist';
+            src: url('https://cdn.jsdelivr.net/npm/geist@1.0.3/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+            font-weight: 700;
+        }
+
+        body {
+            font-family: 'Geist', sans-serif;
+            background-color: #0a0a0a;
+            color: #e5e2e1;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+
+        /* Monolithic Grid Lines */
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, #171717 1px, transparent 1px),
+                              linear-gradient(to bottom, #171717 1px, transparent 1px);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #262626;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed": "#1a1c1c",
+                      "primary-fixed": "#e2e2e2",
+                      "primary-container": "#e2e2e2",
+                      "on-primary": "#2f3131",
+                      "on-primary-fixed-variant": "#454747",
+                      "error": "#ffb4ab",
+                      "surface-bright": "#3a3939",
+                      "error-container": "#93000a",
+                      "inverse-on-surface": "#313030",
+                      "tertiary": "#ffffff",
+                      "on-surface": "#e5e2e1",
+                      "surface-container-highest": "#353434",
+                      "on-background": "#e5e2e1",
+                      "secondary-fixed-dim": "#c7c6c6",
+                      "on-tertiary-container": "#636565",
+                      "surface-variant": "#353434",
+                      "on-tertiary-fixed-variant": "#454747",
+                      "secondary-fixed": "#e3e2e2",
+                      "surface-container-high": "#2a2a2a",
+                      "on-secondary-fixed-variant": "#464747",
+                      "surface": "#141313",
+                      "tertiary-fixed": "#e2e2e2",
+                      "inverse-surface": "#e5e2e1",
+                      "secondary": "#c7c6c6",
+                      "on-primary-fixed": "#1a1c1c",
+                      "secondary-container": "#484949",
+                      "surface-dim": "#141313",
+                      "on-secondary-fixed": "#1a1c1c",
+                      "outline": "#8e9192",
+                      "surface-container-lowest": "#0e0e0e",
+                      "tertiary-container": "#e2e2e2",
+                      "surface-container-low": "#1c1b1b",
+                      "on-primary-container": "#636565",
+                      "background": "#141313",
+                      "primary": "#ffffff",
+                      "surface-container": "#201f1f",
+                      "primary-fixed-dim": "#c6c6c7",
+                      "surface-tint": "#c6c6c7",
+                      "on-tertiary": "#2f3131",
+                      "on-error": "#690005",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary": "#2f3131",
+                      "outline-variant": "#444748",
+                      "on-secondary-container": "#b8b8b8",
+                      "tertiary-fixed-dim": "#c6c6c7",
+                      "on-surface-variant": "#c4c7c8",
+                      "inverse-primary": "#5d5f5f"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0px",
+                      "lg": "0px",
+                      "xl": "0px",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "margin-desktop": "64px",
+                      "margin-mobile": "20px",
+                      "gutter": "24px",
+                      "container-max": "1440px"
+              },
+              "fontFamily": {
+                      "label-md": ["Geist"],
+                      "mono-sm": ["Geist"],
+                      "body-lg": ["Geist"],
+                      "display-lg": ["Geist"],
+                      "headline-md": ["Geist"],
+                      "headline-sm": ["Geist"],
+                      "body-md": ["Geist"],
+                      "display-lg-mobile": ["Geist"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "mono-sm": ["13px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "body-lg": ["18px", {"lineHeight": "1.6", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                      "display-lg": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}],
+                      "headline-md": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "headline-sm": ["24px", {"lineHeight": "1.3", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "letterSpacing": "0", "fontWeight": "400"}],
+                      "display-lg-mobile": ["40px", {"lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-background selection:bg-primary selection:text-surface">
+<!-- SideNavBar (Authority: JSON) -->
+<aside class="fixed left-0 h-full w-64 bg-surface dark:bg-surface border-r border-outline-variant dark:border-outline-variant flex flex-col py-8 gap-unit z-50">
+<div class="px-8 mb-8">
+<h1 class="font-headline-sm text-headline-sm text-primary">RepoViz Pro</h1>
+<p class="font-label-md text-label-md text-on-surface-variant opacity-60">Enterprise Tier</p>
+</div>
+<nav class="flex flex-col">
+<!-- Dashboard (Inactive) -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-8 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150 group" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<!-- Codebase (Active per Analysis intent) -->
+<a class="bg-primary dark:bg-primary text-surface dark:text-surface font-bold px-8 py-4 flex items-center gap-4 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">code</span>
+<span class="font-label-md text-label-md">Codebase</span>
+</a>
+<!-- Pipelines -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-8 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+<span class="font-label-md text-label-md">Pipelines</span>
+</a>
+<!-- Secrets -->
+<a class="text-on-surface-variant dark:text-on-surface-variant px-8 py-4 flex items-center gap-4 hover:bg-surface-container-high dark:hover:bg-surface-container-high transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]">key</span>
+<span class="font-label-md text-label-md">Secrets</span>
+</a>
+</nav>
+<div class="mt-auto px-8">
+<div class="border border-outline-variant p-4 flex items-center gap-3">
+<div class="w-8 h-8 bg-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-surface text-[18px]">account_circle</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-primary">Admin User</p>
+<p class="text-[10px] text-on-surface-variant font-mono-sm uppercase tracking-widest">ID: 4882-99</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 flex flex-col min-h-screen relative overflow-hidden">
+<!-- Subtle Grid Overlay -->
+<div class="absolute inset-0 grid-bg opacity-[0.03] pointer-events-none"></div>
+<!-- TopNavBar (Authority: JSON) -->
+<header class="fixed top-0 left-64 right-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
+<div class="flex justify-between items-center h-16 px-12 w-full mx-auto">
+<div class="flex items-center gap-12">
+<h2 class="font-headline-sm text-headline-sm font-bold text-primary">Repositories</h2>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary dark:text-primary border-b-2 border-primary pb-1 font-label-md text-label-md cursor-pointer" href="#">Repositories</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md cursor-pointer" href="#">Activity</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md cursor-pointer" href="#">Analytics</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md cursor-pointer" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
+<input class="bg-surface-container-low border border-outline-variant pl-10 pr-4 py-1.5 font-label-md text-label-md focus:border-primary focus:ring-0 w-64 transition-all duration-200" placeholder="Filter history..." type="text"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-opacity duration-200 active:opacity-70">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-opacity duration-200 active:opacity-70">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Content Body -->
+<div class="pt-24 px-12 pb-12 flex-1 relative z-10">
+<!-- Header Section -->
+<div class="mb-12 flex justify-between items-end">
+<div>
+<h3 class="font-display-lg text-[48px] font-bold text-primary mb-2 tracking-tighter">Analysis History</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                        Technical audit trail of scanned repositories. Each entry represents a full architecture and security decomposition.
+                    </p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 border border-outline-variant font-label-md text-label-md text-primary hover:bg-surface-container-high transition-all">
+                        Export Report
+                    </button>
+<button class="px-6 py-3 bg-primary text-surface font-label-md text-label-md hover:bg-on-surface-variant transition-all">
+                        Refresh Node
+                    </button>
+</div>
+</div>
+<!-- Bento-ish Grid of Repository Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Empty State / Add New Card -->
+<div class="border border-dashed border-outline-variant h-[400px] flex flex-col items-center justify-center group cursor-pointer hover:border-primary transition-colors">
+<div class="mb-6 w-16 h-16 border border-outline-variant flex items-center justify-center group-hover:bg-primary group-hover:text-surface transition-all">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-primary mb-2">Analyze New Repository</p>
+<p class="font-mono-sm text-mono-sm text-on-surface-variant px-12 text-center opacity-60">Initialize a fresh deep-scan of local or remote git clusters.</p>
+</div>
+<!-- Card 01: Active Project -->
+<div class="border border-outline-variant bg-surface-container-lowest h-[400px] flex flex-col p-8 group hover:border-primary transition-all relative">
+<div class="flex justify-between items-start mb-12">
+<div class="flex flex-col">
+<span class="text-[10px] font-mono-sm text-primary opacity-40 uppercase tracking-[0.2em] mb-2">Production</span>
+<h4 class="font-headline-sm text-headline-sm text-primary">core-engine-v4</h4>
+</div>
+<div class="w-3 h-3 bg-primary"></div>
+</div>
+<div class="flex-1 space-y-6">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Complexity Index</span>
+<span class="font-label-md text-primary">0.82</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Tech Stack</span>
+<span class="font-label-md text-primary">Rust / WASM</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Last Scanned</span>
+<span class="font-label-md text-primary">12m ago</span>
+</div>
+</div>
+<div class="mt-8">
+<button class="w-full py-4 border border-outline-variant group-hover:bg-primary group-hover:text-surface font-label-md text-label-md transition-all flex items-center justify-center gap-2">
+                            VIEW ARCHITECTURE <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 02: Secondary Project -->
+<div class="border border-outline-variant bg-surface-container-lowest h-[400px] flex flex-col p-8 group hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-12">
+<div class="flex flex-col">
+<span class="text-[10px] font-mono-sm text-on-surface-variant opacity-40 uppercase tracking-[0.2em] mb-2">Staging</span>
+<h4 class="font-headline-sm text-headline-sm text-primary">frontend-monolith</h4>
+</div>
+<div class="w-3 h-3 bg-secondary-container"></div>
+</div>
+<div class="flex-1 space-y-6">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Complexity Index</span>
+<span class="font-label-md text-primary">0.45</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Tech Stack</span>
+<span class="font-label-md text-primary">Next.js / TS</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Last Scanned</span>
+<span class="font-label-md text-primary">2d ago</span>
+</div>
+</div>
+<div class="mt-8">
+<button class="w-full py-4 border border-outline-variant group-hover:bg-primary group-hover:text-surface font-label-md text-label-md transition-all flex items-center justify-center gap-2">
+                            VIEW ARCHITECTURE <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Card 03: Performance Insight (Different Pattern) -->
+<div class="border border-outline-variant bg-surface-container-lowest h-[400px] flex flex-col p-8 group hover:border-primary transition-all lg:col-span-2">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12 h-full">
+<div class="flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-mono-sm text-primary opacity-40 uppercase tracking-[0.2em] mb-2">Internal Tooling</span>
+<h4 class="font-headline-sm text-[32px] text-primary mb-4">api-gateway-mesh</h4>
+<p class="font-body-md text-on-surface-variant mb-6">Service mesh visualization showing high-latency nodes and critical path dependencies.</p>
+</div>
+<div class="flex gap-4">
+<div class="px-4 py-2 border border-outline-variant text-[11px] font-mono-sm text-primary">STABLE</div>
+<div class="px-4 py-2 border border-outline-variant text-[11px] font-mono-sm text-primary">9.4/10 SEC</div>
+</div>
+</div>
+<div class="relative bg-surface-container-high border border-outline-variant flex items-center justify-center overflow-hidden">
+<!-- Visual Asset Placeholder -->
+<div class="absolute inset-0 grid-bg opacity-10"></div>
+<div class="relative flex flex-col items-center">
+<span class="material-symbols-outlined text-[64px] text-primary opacity-20">hub</span>
+<p class="font-mono-sm text-[10px] text-on-surface-variant mt-2 uppercase tracking-widest">Network Topology Map</p>
+</div>
+<div class="absolute bottom-4 right-4">
+<span class="font-label-md text-primary bg-surface px-3 py-1 border border-outline-variant text-[12px]">LIVE DATA</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 04: Legacy Project -->
+<div class="border border-outline-variant bg-surface-container-lowest h-[400px] flex flex-col p-8 group hover:border-primary transition-all">
+<div class="flex justify-between items-start mb-12 opacity-50">
+<div class="flex flex-col">
+<span class="text-[10px] font-mono-sm text-on-surface-variant opacity-40 uppercase tracking-[0.2em] mb-2">Deprecated</span>
+<h4 class="font-headline-sm text-headline-sm text-primary">legacy-auth-service</h4>
+</div>
+<div class="w-3 h-3 bg-error opacity-40"></div>
+</div>
+<div class="flex-1 space-y-6 opacity-50">
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Complexity Index</span>
+<span class="font-label-md text-primary">0.99</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Tech Stack</span>
+<span class="font-label-md text-primary">Python / Django</span>
+</div>
+<div class="flex items-center justify-between border-b border-outline-variant pb-2">
+<span class="font-mono-sm text-on-surface-variant">Last Scanned</span>
+<span class="font-label-md text-primary">1y ago</span>
+</div>
+</div>
+<div class="mt-8">
+<button class="w-full py-4 border border-outline-variant text-on-surface-variant font-label-md text-label-md cursor-not-allowed flex items-center justify-center gap-2">
+                            ARCHIVE LOCKED
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (Authority: JSON) -->
+<footer class="w-full mt-auto bg-surface border-t border-outline-variant relative z-10">
+<div class="flex justify-between items-center py-8 px-12 w-full max-w-container-max mx-auto">
+<p class="font-mono-sm text-mono-sm text-on-surface-variant">© 2024 RepoViz Inc. Precision Engineering.</p>
+<div class="flex gap-8">
+<a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Documentation</a>
+<a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">API</a>
+<a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Privacy</a>
+<a class="font-mono-sm text-mono-sm text-on-surface-variant hover:text-primary hover:underline transition-all" href="#">Status</a>
+</div>
+</div>
+</footer>
+</main>
+<script>
+        // Micro-interactions for the monolithic grid
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Potential for lightweight glow effect or sound trigger
+            });
+        });
+
+        // Simple search filtering logic
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            document.querySelectorAll('.grid > div:not(:first-child)').forEach(card => {
+                const title = card.querySelector('h4')?.textContent.toLowerCase() || '';
+                if (title.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body></html>

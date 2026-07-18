@@ -83,28 +83,35 @@ export function HistoryPage() {
   }, [authLoading, user])
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mx-auto max-w-[1440px] px-4 sm:px-16 py-16 pt-24">
+      <div className="mb-12 flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">Analysis History</h1>
-          <p className="text-lg text-muted-foreground">Your saved repository analyses</p>
+          <h1 className="text-[48px] font-bold text-primary mb-2 tracking-tighter">Analysis History</h1>
+          <p className="text-[16px] text-muted-foreground max-w-xl leading-[1.6]">
+            Technical audit trail of scanned repositories. Each entry represents a full architecture and security decomposition.
+          </p>
         </div>
         {user && (
-          <Button variant="outline" onClick={loadHistory} disabled={isLoading}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <div className="flex gap-4">
+            <Button variant="outline" onClick={loadHistory} disabled={isLoading} className="px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
+              Export Report
+            </Button>
+            <Button onClick={loadHistory} disabled={isLoading} className="px-6 py-3 bg-primary text-primary-foreground text-[14px] font-medium uppercase tracking-[0.05em]">
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {authLoading || isLoading ? (
-          <div className="text-center py-12">
-            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <div className="col-span-full text-center py-12">
+            <div className="mx-auto mb-4 h-8 w-8 border-2 border-muted border-t-primary animate-spin" />
             <p className="text-muted-foreground">Loading history...</p>
           </div>
         ) : !user ? (
-          <div className="text-center py-12">
+          <div className="col-span-full text-center py-12">
             <div className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50">
               <GitHubIcon size="xl" />
             </div>
@@ -114,64 +121,72 @@ export function HistoryPage() {
             </Button>
           </div>
         ) : error ? (
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
+          <div className="col-span-full border border-destructive/50 bg-destructive/10 p-6">
             <p className="text-sm text-destructive">{error}</p>
             <Button variant="outline" className="mt-4" onClick={loadHistory}>
               Try Again
             </Button>
           </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50">
-              <GitHubIcon size="xl" />
+          <>
+            {/* Empty State / Add New Card */}
+            <div className="border border-dashed border-border h-[400px] flex flex-col items-center justify-center group cursor-pointer hover:border-primary transition-colors">
+              <div className="mb-6 w-16 h-16 border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                <span className="text-[32px]">+</span>
+              </div>
+              <p className="text-[24px] font-semibold text-primary mb-2">Analyze New Repository</p>
+              <p className="text-[13px] text-muted-foreground px-12 text-center opacity-60 font-mono">Initialize a fresh deep-scan of local or remote git clusters.</p>
             </div>
-            <p className="text-muted-foreground">No repositories analyzed yet</p>
-          </div>
+          </>
         ) : (
-          items.map((item, index) => (
-            <div
-              key={item.id}
-              className="group relative overflow-hidden rounded-lg border border-border bg-card hover:border-primary hover:shadow-lg transition-all duration-200 animate-in fade-in slide-in-from-top-2"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-start gap-4 min-w-0 flex-1">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted flex-shrink-0 group-hover:bg-primary/10 transition-colors duration-200 text-foreground group-hover:text-primary">
-                    <GitHubIcon size="lg" />
+          <>
+            {/* Add New Card */}
+            <Link href="/" className="border border-dashed border-border h-[400px] flex flex-col items-center justify-center group cursor-pointer hover:border-primary transition-colors">
+              <div className="mb-6 w-16 h-16 border border-border flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+                <span className="text-[32px]">+</span>
+              </div>
+              <p className="text-[24px] font-semibold text-primary mb-2">Analyze New Repository</p>
+              <p className="text-[13px] text-muted-foreground px-12 text-center opacity-60 font-mono">Initialize a fresh deep-scan of local or remote git clusters.</p>
+            </Link>
+
+            {items.map((item, index) => (
+              <div
+                key={item.id}
+                className="group border border-border bg-card h-[400px] flex flex-col p-8 hover:border-primary transition-all relative animate-in fade-in slide-in-from-top-2"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <div className="flex justify-between items-start mb-12">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-mono text-primary opacity-40 uppercase tracking-[0.2em] mb-2">Production</span>
+                    <h4 className="text-[24px] font-semibold text-primary">{item.repoName}</h4>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-semibold text-foreground mb-1 truncate">
-                      {item.repoName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2 truncate">{item.url}</p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {formatRelativeDate(item.analyzedAt)}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FolderTree className="h-4 w-4" />
-                        {item.totalFiles.toLocaleString()} files
-                      </div>
-                      <div>
-                        {item.totalFolders.toLocaleString()} folders
-                      </div>
-                      <div>
-                        depth {item.maxDepth}
-                      </div>
-                    </div>
+                  <div className="w-3 h-3 bg-primary"></div>
+                </div>
+                <div className="flex-1 space-y-6">
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <span className="text-[13px] text-muted-foreground font-mono">Total Files</span>
+                    <span className="text-[14px] font-medium text-primary">{item.totalFiles.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <span className="text-[13px] text-muted-foreground font-mono">Folders</span>
+                    <span className="text-[14px] font-medium text-primary">{item.totalFolders.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-2">
+                    <span className="text-[13px] text-muted-foreground font-mono">Last Scanned</span>
+                    <span className="text-[14px] font-medium text-primary">{formatRelativeDate(item.analyzedAt)}</span>
                   </div>
                 </div>
-                <Button asChild variant="outline" className="flex-shrink-0 group-hover:border-primary group-hover:bg-primary/5 transition-all duration-200">
-                  <Link href={`/?historyId=${encodeURIComponent(item.id)}`}>
-                    View Again
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-200" />
+                <div className="mt-8">
+                  <Link
+                    href={`/?historyId=${encodeURIComponent(item.id)}`}
+                    className="w-full py-4 border border-border group-hover:bg-primary group-hover:text-primary-foreground font-medium text-[14px] uppercase tracking-[0.05em] transition-all flex items-center justify-center gap-2"
+                  >
+                    View Architecture <ArrowRight className="h-4 w-4" />
                   </Link>
-                </Button>
+                </div>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
-            </div>
-          ))
+            ))}
+          </>
         )}
       </div>
     </div>

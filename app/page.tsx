@@ -132,28 +132,28 @@ function HomeContent() {
           
           {error && (
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 animate-in fade-in duration-300">
-              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6">
-                <h3 className="text-lg font-semibold text-destructive mb-2">Error Analyzing Repository</h3>
-                <p className="text-sm text-destructive/80">{error}</p>
+              <div className="border border-destructive/50 bg-destructive/10 p-6">
+                <h3 className="text-[14px] font-semibold text-destructive mb-2 uppercase tracking-[0.05em]">Error Analyzing Repository</h3>
+                <p className="text-[16px] text-destructive/80">{error}</p>
                 <button
                   onClick={handleReset}
-                  className="mt-4 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                  className="mt-4 px-6 py-3 bg-destructive text-destructive-foreground text-[14px] font-medium uppercase tracking-[0.05em] hover:opacity-90 transition-opacity"
                 >
                   Try Again
                 </button>
               </div>
             </div>
           )}
-          
+
           {isLoading && (
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 animate-in fade-in duration-300">
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="relative w-16 h-16 mb-6">
-                  <div className="absolute inset-0 border-3 border-muted rounded-full" />
-                  <div className="absolute inset-0 border-3 border-transparent border-t-primary border-r-primary rounded-full animate-spin" />
+                  <div className="absolute inset-0 border-3 border-muted" />
+                  <div className="absolute inset-0 border-3 border-transparent border-t-primary border-r-primary animate-spin" />
                 </div>
-                <p className="text-lg text-muted-foreground font-medium">Analyzing repository...</p>
-                <p className="text-sm text-muted-foreground/60 mt-2">Fetching data and running AI analysis</p>
+                <p className="text-[14px] text-muted-foreground font-medium uppercase tracking-[0.05em]">Analyzing repository...</p>
+                <p className="text-[13px] text-muted-foreground/60 mt-2 font-mono">Fetching data and running AI analysis</p>
               </div>
             </div>
           )}
@@ -162,7 +162,7 @@ function HomeContent() {
         <div className="animate-in fade-in duration-300">
           {isCachedResult && (
             <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
-              <div className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+              <div className="border border-primary/30 bg-primary/10 px-4 py-3 text-[13px] text-primary uppercase tracking-[0.05em]">
                 Loaded from your saved analysis history.
               </div>
             </div>
@@ -176,7 +176,7 @@ function HomeContent() {
           <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 flex justify-center">
             <button
               onClick={handleReset}
-              className="px-6 py-2.5 text-sm font-medium rounded-lg border border-border bg-card hover:border-primary hover:bg-primary/5 transition-all duration-200 active:scale-95"
+              className="px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em] border border-border bg-card hover:border-primary hover:bg-primary/5 transition-all duration-200 active:scale-95"
             >
               Analyze Another Repository
             </button>

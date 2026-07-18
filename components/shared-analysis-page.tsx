@@ -115,13 +115,13 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
   }
 
   const StructureToggle = () => (
-    <div className="flex items-center bg-background rounded-md border border-border p-0.5">
+    <div className="flex items-center bg-background border border-border">
       <button
         onClick={() => setStructureView('tree')}
         className={cn(
-          'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+          'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium transition-colors cursor-pointer uppercase tracking-widest',
           structureView === 'tree'
-            ? 'bg-muted text-foreground'
+            ? 'bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
@@ -131,9 +131,9 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
       <button
         onClick={() => setStructureView('treemap')}
         className={cn(
-          'inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors cursor-pointer',
+          'inline-flex items-center gap-1 px-2 py-1 text-xs font-medium transition-colors cursor-pointer uppercase tracking-widest',
           structureView === 'treemap'
-            ? 'bg-muted text-foreground'
+            ? 'bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
@@ -145,18 +145,18 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
+      <header className="border-b border-border bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-16 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="text-xl font-bold text-foreground truncate">{repoFullName}</h1>
-              <p className="text-sm text-muted-foreground">Shared analysis</p>
+              <h1 className="text-[24px] font-semibold text-primary truncate">{repoFullName}</h1>
+              <p className="text-[13px] text-muted-foreground font-mono">Shared analysis</p>
             </div>
             <a
               href={repoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-[14px] font-medium uppercase tracking-[0.05em] hover:opacity-90 transition-opacity"
             >
               View on GitHub
               <ExternalLink className="h-4 w-4" />
@@ -165,21 +165,25 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-full px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Repository Analysis</h2>
-          <p className="text-sm text-muted-foreground truncate">{repoUrl}</p>
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-16 py-8 pt-24">
+        <div className="mb-8">
+          <h2 className="text-[32px] font-bold text-primary mb-2 tracking-tight">Repository Analysis</h2>
+          <p className="text-[13px] text-muted-foreground truncate font-mono">{repoUrl}</p>
         </div>
 
         {repoData.files.length > 0 && (
           structureView === 'tree' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-6">
-              <div className="lg:col-span-2 bg-card rounded-lg border border-border overflow-hidden flex flex-col max-h-[600px]">
-                <div className="sticky top-0 bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3 z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+              <div className="lg:col-span-2 bg-card border border-border overflow-hidden flex flex-col max-h-[600px]">
+                <div className="sticky top-0 bg-secondary border-b border-border px-4 py-3 z-10">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-foreground">Repository Structure</h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-2 h-2 bg-primary"></div>
+                        <span className="text-[14px] font-medium uppercase tracking-[0.05em] text-muted-foreground">Explorer</span>
+                      </div>
+                      <h3 className="text-[24px] font-semibold text-primary">Repository Structure</h3>
+                      <p className="text-[13px] text-muted-foreground mt-0.5 font-mono">
                         {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders
                       </p>
                     </div>
@@ -199,12 +203,16 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
             </div>
           ) : (
             <div className="mb-6">
-              <div className="bg-card rounded-lg border border-border overflow-hidden">
-                <div className="bg-gradient-to-r from-muted to-muted/50 border-b border-border px-4 py-3">
+              <div className="bg-card border border-border overflow-hidden">
+                <div className="bg-secondary border-b border-border px-4 py-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-foreground">Repository Treemap</h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-2 h-2 bg-primary"></div>
+                        <span className="text-[14px] font-medium uppercase tracking-[0.05em] text-muted-foreground">Treemap</span>
+                      </div>
+                      <h3 className="text-[24px] font-semibold text-primary">Repository Treemap</h3>
+                      <p className="text-[13px] text-muted-foreground mt-0.5 font-mono">
                         {repoData.stats.totalFiles} files • {repoData.stats.totalFolders} folders • {(repoData.stats.totalSize / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </div>
@@ -225,23 +233,23 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
           )
         )}
 
-        <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="bg-card border border-border overflow-hidden">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0 h-auto gap-0 justify-start">
-              <TabsTrigger value="dependencies" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <TabsTrigger value="dependencies" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
                 <GitBranch className="h-4 w-4 mr-2" />
                 Dependencies
               </TabsTrigger>
-              <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="insights" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <TabsTrigger value="insights" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
                 AI Insights
               </TabsTrigger>
-              <TabsTrigger value="recommendations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <TabsTrigger value="recommendations" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
                 Recommendations
               </TabsTrigger>
-              <TabsTrigger value="export" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3">
+              <TabsTrigger value="export" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary hover:bg-muted/50 transition-colors duration-200 px-6 py-3 text-[14px] font-medium uppercase tracking-[0.05em]">
                 Export
               </TabsTrigger>
             </TabsList>
@@ -253,55 +261,55 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
             <TabsContent value="overview" className="flex-1 p-6 m-0 overflow-auto">
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">Repository Summary</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <h3 className="text-[32px] font-semibold text-primary mb-3 tracking-tight">Repository Summary</h3>
+                  <p className="text-[16px] text-muted-foreground leading-[1.6]">
                     {analysisResult.summary}
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-4 border border-blue-200/20">
-                    <h4 className="font-semibold text-foreground mb-2">Architecture</h4>
-                    <p className="text-sm text-muted-foreground">{analysisResult.architecture}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-secondary/30 border border-border p-6">
+                    <span className="text-[13px] text-muted-foreground mb-2 block tracking-widest uppercase">Architecture</span>
+                    <p className="text-[16px] text-muted-foreground leading-[1.6]">{analysisResult.architecture}</p>
                   </div>
-                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg p-4 border border-purple-200/20">
-                    <h4 className="font-semibold text-foreground mb-2">Code Quality</h4>
-                    <p className="text-sm text-muted-foreground">{analysisResult.codeQuality}</p>
+                  <div className="bg-secondary/30 border border-border p-6">
+                    <span className="text-[13px] text-muted-foreground mb-2 block tracking-widest uppercase">Code Quality</span>
+                    <p className="text-[16px] text-muted-foreground leading-[1.6]">{analysisResult.codeQuality}</p>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-foreground mb-3">Repository Statistics</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-lg p-4 border border-blue-200/20">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Total Files</div>
-                      <div className="text-3xl font-bold text-blue-600">{repoData.stats.totalFiles}</div>
+                  <h4 className="text-[14px] font-medium uppercase tracking-[0.05em] text-muted-foreground mb-3">Repository Statistics</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="border border-border p-4">
+                      <div className="text-[13px] text-muted-foreground mb-1 uppercase tracking-widest">Total Files</div>
+                      <div className="text-[32px] font-bold text-primary">{repoData.stats.totalFiles}</div>
                     </div>
-                    <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-lg p-4 border border-purple-200/20">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Total Folders</div>
-                      <div className="text-3xl font-bold text-purple-600">{repoData.stats.totalFolders}</div>
+                    <div className="border border-border p-4">
+                      <div className="text-[13px] text-muted-foreground mb-1 uppercase tracking-widest">Total Folders</div>
+                      <div className="text-[32px] font-bold text-primary">{repoData.stats.totalFolders}</div>
                     </div>
-                    <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-lg p-4 border border-green-200/20">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Max Depth</div>
-                      <div className="text-3xl font-bold text-green-600">{repoData.stats.maxDepth}</div>
+                    <div className="border border-border p-4">
+                      <div className="text-[13px] text-muted-foreground mb-1 uppercase tracking-widest">Max Depth</div>
+                      <div className="text-[32px] font-bold text-primary">{repoData.stats.maxDepth}</div>
                     </div>
-                    <div className="bg-gradient-to-br from-amber-500/10 to-amber-500/5 rounded-lg p-4 border border-amber-200/20">
-                      <div className="text-xs font-medium text-muted-foreground mb-1">Avg File Size</div>
-                      <div className="text-3xl font-bold text-amber-600">{(repoData.stats.averageFileSize / 1024).toFixed(1)}KB</div>
+                    <div className="border border-border p-4">
+                      <div className="text-[13px] text-muted-foreground mb-1 uppercase tracking-widest">Avg File Size</div>
+                      <div className="text-[32px] font-bold text-primary">{(repoData.stats.averageFileSize / 1024).toFixed(1)}KB</div>
                     </div>
                   </div>
                 </div>
 
                 {Object.keys(repoData.stats.languages).length > 0 && (
                   <div>
-                    <h4 className="font-semibold text-foreground mb-3">Languages Used</h4>
+                    <h4 className="text-[14px] font-medium uppercase tracking-[0.05em] text-muted-foreground mb-3">Languages Used</h4>
                     <div className="flex flex-wrap gap-2">
                       {Object.entries(repoData.stats.languages)
                         .sort(([, a], [, b]) => b - a)
                         .map(([lang, count]) => (
                           <div
                             key={lang}
-                            className="px-3 py-1.5 rounded-full bg-muted text-sm font-medium text-foreground"
+                            className="px-3 py-1.5 border border-border text-sm font-medium text-primary"
                           >
                             {lang.toUpperCase()} <span className="text-muted-foreground">({count})</span>
                           </div>
@@ -318,19 +326,19 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
                   analysisResult.insights.map((insight, index) => (
                     <div
                       key={`insight-${index}`}
-                      className="flex gap-4 p-4 rounded-lg border border-border bg-card/50 hover:bg-card/80 transition-colors"
+                      className="flex gap-4 p-4 border border-border bg-card/50 hover:bg-card/80 transition-colors"
                     >
                       <div className="flex-shrink-0 mt-0.5">
                         {getInsightIconForType(insight.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground mb-1">{insight.title}</h4>
-                        <p className="text-sm text-muted-foreground">{insight.description}</p>
+                        <h4 className="font-semibold text-primary mb-1">{insight.title}</h4>
+                        <p className="text-[16px] text-muted-foreground leading-[1.6]">{insight.description}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No insights available</p>
+                  <p className="text-[16px] text-muted-foreground">No insights available</p>
                 )}
               </div>
             </TabsContent>
@@ -340,13 +348,13 @@ export function SharedAnalysisPage({ shareId }: { shareId: string }) {
                 {analysisResult.recommendations && analysisResult.recommendations.length > 0 ? (
                   <ol className="space-y-3 list-decimal list-inside">
                     {analysisResult.recommendations.map((rec, index) => (
-                      <li key={index} className="text-sm text-muted-foreground leading-relaxed">
+                      <li key={index} className="text-[16px] text-muted-foreground leading-[1.6]">
                         {rec}
                       </li>
                     ))}
                   </ol>
                 ) : (
-                  <p className="text-sm text-muted-foreground">No recommendations at this time</p>
+                  <p className="text-[16px] text-muted-foreground">No recommendations at this time</p>
                 )}
               </div>
             </TabsContent>
