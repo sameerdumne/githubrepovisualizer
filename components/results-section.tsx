@@ -9,6 +9,7 @@ import { ExportPanel } from '@/components/export-panel'
 import { DependencyGraph } from '@/components/dependency-graph'
 import { RepositoryData, AnalysisResult, buildTreeStructure } from '@/lib/api/repository-analysis'
 import { AlertCircle, CheckCircle2, AlertTriangle, Info, GitBranch, LayoutGrid, List } from 'lucide-react'
+import { SharePanel } from '@/components/share-panel'
 import { cn } from '@/lib/utils'
 
 interface ResultsSectionProps {
@@ -87,9 +88,16 @@ export function ResultsSection({ repoUrl, repoData, analysisResult }: ResultsSec
 
   return (
     <div className="mx-auto max-w-full px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground mb-2">Repository Analysis</h2>
-        <p className="text-sm text-muted-foreground truncate">{repoUrl}</p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Repository Analysis</h2>
+          <p className="text-sm text-muted-foreground truncate">{repoUrl}</p>
+        </div>
+        <SharePanel
+          repoUrl={repoUrl}
+          repoData={repoData}
+          analysisResult={analysisResult}
+        />
       </div>
 
       {/* Tree View and Preview Layout */}
